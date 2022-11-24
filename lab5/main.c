@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include <c8051F360.h>                 // SFR declarations
+#include "C8051F360.h"                 // SFR declarations
 #include <string.h>
 #include <iostream>
 #include <string>
@@ -65,9 +65,9 @@ void writeCommand(char com){
     RW = 0;
     SE = 1;
 
-    for(i = 0; i < 10; i++){}
+    wait(10);
     SE = 0;
-    for(i = 0; i < 10; i++){}
+    wait(10);
 }
 void writeChar(char sym){
     int i;
@@ -93,7 +93,7 @@ void wait(long count){
     long i;
     for(i = 0; i < count; i++){}
 }
-void displayInit(void){ 			// ����� ������������� ������
+void displayInit(void){ 			    // initialization screen
 
     wait(10000); //1000 : 10��	�������� ��������  ��������
 
@@ -125,7 +125,26 @@ void Port_IO_Init(){
     P2MDOUT   = 0xFF;
     XBR1      = 0x40;
 }
-char convert(int n){
-    if (n == 0) return 0;
-    int count = 
+char convert(int dNum){
+    if (dNum == 0) return 0;
+    int count = 0;
+
+    // брать по 4
+    int four = 4;
+    while (dNum != 0){
+        dNum = 0;
+        int fourNum = 1001;
+        int result = 0;
+        // работаем с 4 значным 2ичным числом
+        for(int j = 1; j <= 4; j++){
+            result = fourNum % 2 * j;
+            fourNum = fourNum / 10;
+
+        }
+
+
+    }
+
+
+    return 'A';
 }
