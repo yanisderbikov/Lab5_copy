@@ -51,7 +51,6 @@ int main (){
         writeChar(currentNum);
         i++;
     }
-
     return 0;
 }
 
