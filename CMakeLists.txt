@@ -3,4 +3,4 @@ project(Lab5_copy C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Lab5_copy lab5/main.c lab1/LED/main.c)
+add_executable(Lab5_copy lab5/main.c lab1/LED/main.c test/main.cpp test/main.c)

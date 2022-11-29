@@ -35,6 +35,8 @@ void displayInit(void);
 void wait(long count);
 char getNum();
 char convert(int n);
+int pow2(int to);
+char AF(int rest);
 
 //-----------------------------------------------------------------------------
 // MAIN Routine
@@ -124,26 +126,57 @@ void Port_IO_Init(){
     P2MDOUT   = 0xFF;
     XBR1      = 0x40;
 }
-char convert(int dNum){
-    if (dNum == 0) return 0;
-    int count = 0;
+char convert(int binary){
+//    covert to ten
+    int j = 0;
+    int sumTen = 0;
+    int remains = 0;
+    while (binary != 0){
+        remains = binary % 10;
+        sumTen = sumTen + remains * pow2(j);
+        binary = binary / 10;
+        j++;
+    }
+    if (remains == 1){
+        sumTen = sumTen + 1;
+    }
+    // ------------------------------------
+    //          convert to 16
+    // ------------------------------------
 
-    // брать по 4
-    int four = 4;
-    while (dNum != 0){
-        dNum = 0;
-        int fourNum = 1001;
-        int result = 0;
-        // работаем с 4 значным 2ичным числом
-        for(int j = 1; j <= 4; j++){
-            result = fourNum % 2 * j;
-            fourNum = fourNum / 10;
-
-        }
-
-
+    char[] result = char[]
+    while (sumTen != 0){
+        remains = sumTen % 16;
+        sumTen = sumTen/16;
     }
 
 
-    return 'A';
+    return sumTen;
+}
+char AF(int rest){
+    switch (rest)
+    {
+        case 10:
+            return 'A';
+        case 11:
+            return 'B';
+        case 12:
+            return 'C';
+        case 13:
+            return 'D';
+        case 14:
+            return 'E';
+        case 15:
+            return 'F';
+    }
+}
+int pow2(int to){
+    if (to == 0){
+        return 0;
+    }
+    int result = 2;
+    for (int i = 1; i < to; i++) {
+        result = result * 2;
+    }
+    return result;
 }
