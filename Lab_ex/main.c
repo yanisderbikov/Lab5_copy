@@ -133,27 +133,34 @@ tmp = P2;
 
 
 
-if (!(tmp & 0x1)){ flag = 'A';
+if (!(tmp & 0x1)){
+    flag = 'A';
 }
-ROW0 = 1; ROW1 = 0;
+ROW0 = 1;
+ROW1 = 0;
 tmp = P2;
-if (!(tmp & 0x1)){ flag = 'B';
+if (!(tmp & 0x1)){
+    flag = 'B';
 }
 ROW1 = 1;
 
 ROW2 = 0;
 tmp = P2;
-if (!(tmp & 0x1)){ flag = 'C';
+if (!(tmp & 0x1)){
+    flag = 'C';
 }
-ROW2 = 1; ROW3 = 0;
+ROW2 = 1;
+ROW3 = 0;
 tmp = P2;
-if (!(tmp & 0x1)){ flag = 'D';
+if (!(tmp & 0x1)){
+    flag = 'D';
 }
-for (i = 0; i <= 10000; i++) {}
-// нажата А (выводятся первые буквы) if (flag == 'A'){
-ROW0 = 0; tmp = P2;
+    wait(10000);
+// нажата А (выводятся первые буквы)
+if (flag == 'A'){
+     ROW0 = 0; tmp = P2;
 // первая строка
-for (i = 0; i <= 10000; i++) {}
+    wait(1000);
 if (!(tmp & 0x8)){ out = '1';
 }
 if (!(tmp & 0x4)){ out = 'A';
