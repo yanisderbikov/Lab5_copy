@@ -47,11 +47,12 @@ E = 0; display_init ();
 flag = '0';
 code_comparison();
 }
-void Timer_Init(){
-}
+void Timer_Init(){ // there some shit
+
 TCON TMOD CKCON TH1
         = 0x40; = 0x20;
 = 0x08; = 0x60;
+}
 void UART_Init(){
     SCON0 = 0x10;
 }
@@ -168,44 +169,45 @@ void second_str (void){
     // нажата А (выводятся первые буквы)
     if (flag == 'A'){
          ROW0 = 0; tmp = P2;
-    // первая строка
+        // первая строка
         wait(1000);
-    if (!(tmp & 0x8)){
-        out = '1';
-    }
-    if (!(tmp & 0x4)){
-        out = 'A';
-    }
-    if (!(tmp & 0x2)){
-        out = 'D';
-    }
-    wait(5000); // 2 строка
-    ROW0 = 1;
-    ROW1 = 0;
-    tmp = P2;
-    if (!(tmp & 0x8)){
-        out = 'G';
-    }
-    if (!(tmp & 0x4)){
-        out = 'J';
-    }
-    if (!(tmp & 0x2)){
-        out = 'M';
-    }
-    wait(5000);
-    // 3 строка
-    ROW1 = 1;
-    ROW2 = 0;
-    tmp = P2;
-    if (!(tmp & 0x8)){
-        out = 'P';
-    }
-    if (!(tmp & 0x4)){
-        out = 'T';
-    }
-    if (!(tmp & 0x2)){
-        out = 'W';
-    }
+        if (!(tmp & 0x8)){
+            out = '1';
+        }
+        if (!(tmp & 0x4)){
+            out = 'A';
+        }
+        if (!(tmp & 0x2)){
+            out = 'D';
+        }
+        // 2 строка
+        wait(5000);
+        ROW0 = 1;
+        ROW1 = 0;
+        tmp = P2;
+        if (!(tmp & 0x8)){
+            out = 'G';
+        }
+        if (!(tmp & 0x4)){
+            out = 'J';
+        }
+        if (!(tmp & 0x2)){
+            out = 'M';
+        }
+        wait(5000);
+        // 3 строка
+        ROW1 = 1;
+        ROW2 = 0;
+        tmp = P2;
+        if (!(tmp & 0x8)){
+            out = 'P';
+        }
+        if (!(tmp & 0x4)){
+            out = 'T';
+        }
+        if (!(tmp & 0x2)){
+            out = 'W';
+        }
     }
 
     wait(10000);
@@ -242,7 +244,7 @@ void second_str (void){
         }
     }
     // Нажата С (выводятся 3и буквы)
-        if (flag == 'C'){
+    if (flag == 'C'){
         // 1 строка
         ROW0 = 0;
         tmp = P2;
@@ -286,31 +288,31 @@ void second_str (void){
     // Нажата D (выводятся цифры)
 
     if (flag == 'D'){
-    for (i = 0; i <= 10000; i++) {} // 1 строка
-    ROW0 = 0; ROW1 = 0; ROW2 = 0; tmp = P2;
-    if (!(tmp & 0x8)){ out = '1';
-    }
-    if (!(tmp & 0x4)){ out = '2';
-    }
-    if (!(tmp & 0x2)){ out = '3';
-    }
-    // 2 строка
-    ROW0 = 1; ROW1 = 0; tmp = P2;
-    if (!(tmp & 0x8)){ out = '4';
-    }
+        for (i = 0; i <= 10000; i++) {} // 1 строка
+        ROW0 = 0; ROW1 = 0; ROW2 = 0; tmp = P2;
+        if (!(tmp & 0x8)){ out = '1';
+        }
+        if (!(tmp & 0x4)){ out = '2';
+        }
+        if (!(tmp & 0x2)){ out = '3';
+        }
+        // 2 строка
+        ROW0 = 1; ROW1 = 0; tmp = P2;
+        if (!(tmp & 0x8)){ out = '4';
+        }
 
-    if (!(tmp & 0x4)){ out = '5';
-    }
-    if (!(tmp & 0x2)){ out = '6';
-    }
-    // 3 строка
-    ROW1 = 1; ROW2 = 0; tmp = P2;;
-    if (!(tmp & 0x8)){ out = '7';
-    }
-    if (!(tmp & 0x4)){ out = '8';
-    }
-    if (!(tmp & 0x2)){ out = '9';
-    }
+        if (!(tmp & 0x4)){ out = '5';
+        }
+        if (!(tmp & 0x2)){ out = '6';
+        }
+        // 3 строка
+        ROW1 = 1; ROW2 = 0; tmp = P2;;
+        if (!(tmp & 0x8)){ out = '7';
+        }
+        if (!(tmp & 0x4)){ out = '8';
+        }
+        if (!(tmp & 0x2)){ out = '9';
+        }
     } // 4 строка
     ROW2 = 1; ROW3 = 0; tmp = P2;
 
