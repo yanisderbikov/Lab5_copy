@@ -10,18 +10,22 @@ sbit ROW0 = P2^7;
 sbit ROW1 = P2^6;
 sbit ROW2 = P2^5;
 sbit ROW3 = P2^4;
-int i;
+long i;
 int n;
 int k;
 int s;
 int code1;
 unsigned char STR1[]="Hello";
-unsigned char STR2[]="world"; unsigned char STR_err[]=" ERROR"; unsigned char STR_cor[]=" CORRECT"; unsigned char STR_COMP[];
+unsigned char STR2[]="world";
+unsigned char STR_err[]=" ERROR";
+unsigned char STR_cor[]=" CORRECT";
+unsigned char STR_COMP[];
 char out; char out_pr; int outt; char flag; int count1;
 
 int count2;
 int x;
-int s=1; //----------------------------------------------------------------------------- // Function PROTOTYPES //-----------------------------------------------------------------------------
+int s=1;
+//------------------------------------------------ // Function PROTOTYPES //------------------------------------------//
 void Init_Device(void);
 void PORT_Init (void);
 void Timer2_Init (int counts);
@@ -29,8 +33,10 @@ void Timer2_ISR (void);
 void write_command (int write_data);
 void write_code (int write_data);
 void display_init (void);
-void write_sentence (unsigned char *STR); void delete_sentence (void);
-void write_sentence_2 (unsigned char *STR); void first_str (void);
+void write_sentence (unsigned char *STR);
+void delete_sentence (void);
+void write_sentence_2 (unsigned char *STR);
+void first_str (void);
 void second_str (void);
 void read_code (void);
 void UART_transfer (int data_uart);
@@ -40,18 +46,20 @@ void wait(long count);
 //-----------------------------------------------------------------------------
 
 // MAIN Routine //-----------------------------------------------------------------------------
- void main (void){
-PCA0MD &= ~0x40;
-//Init_Device();
-E = 0; display_init ();
-flag = '0';
-code_comparison();
+int main (){
+    PCA0MD &= ~0x40;
+    Init_Device();
+    E = 0;
+    display_init();
+    flag = '0';
+    code_comparison();
+    return 0;
 }
 void Timer_Init(){ // there some shit
-
-TCON TMOD CKCON TH1
-        = 0x40; = 0x20;
-= 0x08; = 0x60;
+    TCON  = 0x40;
+    TMOD = 0x20;
+    CKCON = 0x08;
+    TH1 = 0x60;
 }
 void UART_Init(){
     SCON0 = 0x10;
@@ -107,7 +115,7 @@ void display_init (void){
 }
 // вывод предложения
 void write_sentence (unsigned char *STR) {
-    for(n=0; STR[n]!=0;n++){
+    for(n=0; STR[n]!=0; n++){
         write_code(STR[n]);
     }
 }
@@ -139,8 +147,6 @@ void second_str (void){
     ROW0 = 0;
     ROW1 = 0;
     tmp = P2;
-
-
 
     if (!(tmp & 0x1)){
         flag = 'A';
@@ -376,8 +382,7 @@ void code_comparison (void) {
 
 
 void wait(long count){
-    long i;
-    for(i = 0; i < count; i++){}
+     for(i = 0; i < count; i++){}
 }
 //----------------------------------------------------------------------------- // End Of File
 //-------
