@@ -20,7 +20,11 @@ unsigned char STR2[]="world";
 unsigned char STR_err[]=" ERROR";
 unsigned char STR_cor[]=" CORRECT";
 unsigned char STR_COMP[];
-char out; char out_pr; int outt; char flag; int count1;
+char out;
+char out_pr;
+int outt;
+char flag;
+int count1;
 
 int count2;
 int x;
@@ -33,7 +37,8 @@ void Timer2_ISR (void);
 void write_command (int write_data);
 void write_code (int write_data);
 void display_init (void);
-void write_sentence (unsigned char *STR);
+void display_init2(void);
+    void write_sentence (unsigned char *STR);
 void delete_sentence (void);
 void write_sentence_2 (unsigned char *STR);
 void first_str (void);
@@ -46,14 +51,16 @@ void wait(long count);
 //-----------------------------------------------------------------------------
 
 // MAIN Routine //-----------------------------------------------------------------------------
-int main (){
+void main (void){
     PCA0MD &= ~0x40;
     Init_Device();
     E = 0;
-    display_init();
+    display_init2();
     flag = '0';
-    code_comparison();
-    return 0;
+//    code_comparison();
+    write_sentence("hello world");
+    write_sentence_2 (STR1);
+    write_sentence_2 (STR2);
 }
 void Timer_Init(){ // there some shit
     TCON  = 0x40;
@@ -65,10 +72,11 @@ void UART_Init(){
     SCON0 = 0x10;
 }
 void Port_IO_Init(){
-    SFRPAGE = CONFIG_PAGE;
-
-    XBR0 = 0x01;
-    XBR1 = 0x40; }
+    SFRPAGE   = CONFIG_PAGE;
+    P1MDOUT   = 0xE0;
+    P2MDOUT   = 0xFF;
+    XBR1      = 0x40;
+}
 void Init_Device(void){
     Timer_Init();
     UART_Init();
@@ -86,7 +94,8 @@ void write_command (int write_data){
 }
 // вывод символа
 void write_code (int write_data){
-    P2 = write_data; RS = 1;
+    P2 = write_data;
+    RS = 1;
     RW = 0;
 
     wait(5);
@@ -113,6 +122,34 @@ void display_init (void){
     wait(5000); //15ms
     write_command (0xE);
 }
+void display_init2(void){ 			    // initialization screen
+
+    wait(10000); //1000 : 10
+
+    write_command(0x3c);
+    wait(10000); //1000 : 10
+
+    write_command(0x3c);
+    wait(10000); //1000 : 10
+
+    write_command(0x3c);
+
+    wait(10000);
+
+    write_command(0x3c);
+    wait(10000);
+    write_command(0x08);
+
+    wait(10000);
+    write_command(0x01);
+    wait(10000);
+    write_command(0x06);
+    wait(10000);
+    write_command(0xC);
+    wait(10000);
+}
+
+
 // вывод предложения
 void write_sentence (unsigned char *STR) {
     for(n=0; STR[n]!=0; n++){
@@ -379,10 +416,8 @@ void code_comparison (void) {
     wait(300000000);
 }
 
-
-
 void wait(long count){
      for(i = 0; i < count; i++){}
 }
-//----------------------------------------------------------------------------- // End Of File
+//---------------------------------------------- // End Of File
 //-------
