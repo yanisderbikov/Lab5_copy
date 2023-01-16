@@ -4,3 +4,34 @@
 
 очистка экрана 0x01
 wait(5000);
+
+
+нужно сделать опрос клавиатуры
+
+
+//void display_init2(void){ 			    // initialization screen
+//
+//    wait(10000); //1000 : 10
+//
+//    write_command(0x3c);
+//    wait(10000); //1000 : 10
+//
+//    write_command(0x3c);
+//    wait(10000); //1000 : 10
+//
+//    write_command(0x3c);
+//
+//    wait(10000);
+//
+//    write_command(0x3c);
+//    wait(10000);
+//    write_command(0x08);
+//
+//    wait(10000);
+//    write_command(0x01);
+//    wait(10000);
+//    write_command(0x06);
+//    wait(10000);
+//    write_command(0xC);
+//    wait(10000);
+//}

@@ -21,7 +21,7 @@ sbit SE = P1^7; // E
 
 // at void read_code used
 char out;
-int ROW0;
+int LINE1;
 int ROW1;
 int ROW2;
 int ROW3;
@@ -103,7 +103,7 @@ void read_code(){
     char tmp;
     out = 'Z';
     P2 = 0xff;
-    ROW0 = 0;
+    LINE1 = 0;
     ROW1 = 0;
     ROW2 = 0;
     flag = 'Z';
@@ -120,7 +120,7 @@ void read_code(){
     }
 
 //    ---------B-------
-    ROW0 = 1;
+    LINE1 = 1;
     ROW1 = 0;
     tmp = P2;
 

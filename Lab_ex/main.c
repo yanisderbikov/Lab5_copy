@@ -6,10 +6,18 @@
 sbit RS = P1^5;
 sbit RW = P1^6;
 sbit E = P1^7;
-sbit ROW0 = P2^7;
-sbit ROW1 = P2^6;
-sbit ROW2 = P2^5;
-sbit ROW3 = P2^4;
+sbit LINE1 = P2^7;
+sbit LINE2 = P2^6;
+sbit LINE3 = P2^5;
+sbit LINE4 = P2^4;
+sbit COL1 = P2^3;
+sbit COL2 = P2^2;
+sbit COL3 = P2^1;
+sbit COL4 = P2^0;
+
+sbit UART_GET = TI0;                 // UART0 TX interrupt flag
+sbit UART_RESIVE = RI0;              // UART0 RX interrupt flag
+
 long i;
 int n;
 int k;
@@ -27,6 +35,7 @@ char flag;
 int count1;
 
 int count2;
+int j;
 int x;
 int s=1;
 //------------------------------------------------ // Function PROTOTYPES //------------------------------------------//
@@ -38,7 +47,7 @@ void write_command (int write_data);
 void write_code (int write_data);
 void display_init (void);
 void display_init2(void);
-    void write_sentence (unsigned char *STR);
+void write_sentence (unsigned char *STR);
 void delete_sentence (void);
 void write_sentence_2 (unsigned char *STR);
 void first_str (void);
@@ -48,23 +57,113 @@ void UART_transfer (int data_uart);
 unsigned int UART_recieve (void);
 void code_comparison (void);
 void wait(long count);
+void test(void );
+void runCode(void );
+void read_console (void );
 //-----------------------------------------------------------------------------
 
 // MAIN Routine //-----------------------------------------------------------------------------
 
-// нужно подумать почему выводится один раз а не больше
+// TODO нужно выбрать C51 COMPILER V8.01
+//  не работают массивы. Как строить массивы. Как вообще запустить эту залупену
 
 void main (void){
     PCA0MD &= ~0x40;
     Init_Device();
     E = 0;
-    display_init2();
+    display_init();
     flag = '0';
 //    code_comparison();
-    write_sentence("hello world");
-    write_sentence_2 (STR1);
-    write_sentence_2 (STR2);
+//    test();
+    runCode();
 }
+void runCode(){
+    write_sentence("this is a code");
+    second_str();
+    LINE1 = 1;  LINE2 = 1;  LINE3 = 1;  LINE4 = 1;
+    COL1 = 1;   COL2 = 1;   COL3 = 1;   COL4 = 1;
+
+    while (1){
+        read_console();
+        write_code(out);
+    }
+}
+void test(){
+    while (1) {
+        write_sentence("this is the first str");
+        write_sentence_2("this is the sec");
+        first_str(); // перевод на первую строку курсора
+        wait(5000);
+        delete_sentence();
+        second_str();
+        write_sentence_2("ond str");
+        first_str();
+        write_sentence("end");
+        wait(10000);
+        wait(10000);
+        first_str();
+        delete_sentence();
+        second_str();
+        delete_sentence();
+        wait(10000);
+        wait(10000);
+    }
+}
+void read_console (){
+    // этот метод буду самотоятельно кидать в цикл
+//    char tmp;
+//    out = '0';
+    // должна опрашиваться только одна строка
+    LINE1 = 1; LINE2 = 1; LINE3 = 1; LINE4 = 1;
+    char firstLine[] = {'1', '2', '3', 'A'};
+    char secLine[]   = {'4', '5', '6', 'B'};
+    char thirdLine[] = {'7', '8', '9', 'C'};
+    char forthLine[] = {'#', '*', '-', 'D'};
+    char f [] = {firstLine, secLine, thirdLine, forthLine};
+    int coloms[] = {COL1, COL2, COL3, COL4};
+//    int lines[] = {LINE1, LINE2, LINE3, LINE4};
+
+//    for (int ij = 0; ij < 4; ij++){
+//        lines[ij] = 0;
+//        for (int jj = 0; jj < 4; jj++){
+//            if (coloms[jj] == 0 ){
+//                out = f[jj];
+//            }
+//        }
+//        lines[ij] = 1;
+//    }
+
+    LINE1 = 0;
+    for (int jj = 0; jj < 4; jj++){
+        if (coloms[jj] == 0 ){
+            out = firstLine[jj];
+        }
+    }
+    LINE1 = 1;
+    LINE2 = 0;
+    for (int jj = 0; jj < 4; jj++){
+        if (coloms[jj] == 0 ){
+            out = secLine[jj];
+        }
+    }
+    LINE2 = 1;
+    LINE3 = 0;
+    for (int jj = 0; jj < 4; jj++){
+        if (coloms[jj] == 0 ){
+            out = thirdLine[jj];
+        }
+    }
+    LINE3 = 1;
+    LINE4 = 0;
+    for (int jj = 0; jj < 4; jj++){
+        if (coloms[jj] == 0 ){
+            out = forthLine[jj];
+        }
+    }
+    LINE4 = 1;
+
+}
+
 void Timer_Init(){ // there some shit
     TCON  = 0x40;
     TMOD = 0x20;
@@ -125,34 +224,6 @@ void display_init (void){
     wait(5000); //15ms
     write_command (0xE);
 }
-void display_init2(void){ 			    // initialization screen
-
-    wait(10000); //1000 : 10
-
-    write_command(0x3c);
-    wait(10000); //1000 : 10
-
-    write_command(0x3c);
-    wait(10000); //1000 : 10
-
-    write_command(0x3c);
-
-    wait(10000);
-
-    write_command(0x3c);
-    wait(10000);
-    write_command(0x08);
-
-    wait(10000);
-    write_command(0x01);
-    wait(10000);
-    write_command(0x06);
-    wait(10000);
-    write_command(0xC);
-    wait(10000);
-}
-
-
 // вывод предложения
 void write_sentence (unsigned char *STR) {
     for(n=0; STR[n]!=0; n++){
@@ -174,38 +245,37 @@ void delete_sentence (void) {
 void first_str (void){
     write_command(0x80);
 }
-
 // перевод курсора на 2 строку
 void second_str (void){
     write_command(0xC0);
 }
 // чтение символа с клавиатуры
-    void read_code (void){
+void read_code (void){
     char tmp;
     out = 'Z';
     P2 = 0xff;
-    ROW0 = 0;
-    ROW1 = 0;
+    LINE1 = 0;
+    LINE2 = 0;
     tmp = P2;
 
     if (!(tmp & 0x1)){
         flag = 'A';
     }
-    ROW0 = 1;
-    ROW1 = 0;
+    LINE1 = 1;
+    LINE2 = 0;
     tmp = P2;
     if (!(tmp & 0x1)){
         flag = 'B';
     }
-    ROW1 = 1;
+    LINE2 = 1;
 
-    ROW2 = 0;
+    LINE3 = 0;
     tmp = P2;
     if (!(tmp & 0x1)){
         flag = 'C';
     }
-    ROW2 = 1;
-    ROW3 = 0;
+    LINE3 = 1;
+    LINE4 = 0;
     tmp = P2;
     if (!(tmp & 0x1)){
         flag = 'D';
@@ -214,7 +284,8 @@ void second_str (void){
     wait(10000);
     // нажата А (выводятся первые буквы)
     if (flag == 'A'){
-         ROW0 = 0; tmp = P2;
+         LINE1 = 0;
+         tmp = P2;
         // первая строка
         wait(1000);
         if (!(tmp & 0x8)){
@@ -228,8 +299,8 @@ void second_str (void){
         }
         // 2 строка
         wait(5000);
-        ROW0 = 1;
-        ROW1 = 0;
+        LINE1 = 1;
+        LINE2 = 0;
         tmp = P2;
         if (!(tmp & 0x8)){
             out = 'G';
@@ -242,8 +313,8 @@ void second_str (void){
         }
         wait(5000);
         // 3 строка
-        ROW1 = 1;
-        ROW2 = 0;
+        LINE2 = 1;
+        LINE3 = 0;
         tmp = P2;
         if (!(tmp & 0x8)){
             out = 'P';
@@ -261,17 +332,19 @@ void second_str (void){
         if (flag == 'B'){
         // первая строка
         for (i = 0; i <= 10000; i++) {}
-        ROW0 = 0; ROW1 = 0; ROW2 = 0; ROW3 = 0; tmp = P2;
-        if (!(tmp & 0x8)){ out = '1';
+        LINE1 = 0; LINE2 = 0; LINE3 = 0; LINE4 = 0; tmp = P2;
+        if (!(tmp & 0x8)){
+            out = '1';
         }
-        if (!(tmp & 0x4)){ out = 'B';
+        if (!(tmp & 0x4)){
+            out = 'B';
         }
         if (!(tmp & 0x2)){
-
-        out = 'E'; }
+            out = 'E';
+        }
         // 2 строка
-        ROW0 = 1;
-        ROW1 = 0; ROW2 = 0; tmp = P2;
+        LINE1 = 1;
+        LINE2 = 0; LINE3 = 0; tmp = P2;
         if (!(tmp & 0x8)){ out = 'H';
         }
         if (!(tmp & 0x4)){ out = 'K';
@@ -279,7 +352,7 @@ void second_str (void){
         if (!(tmp & 0x2)){ out = 'N';
         }
         // 3 строка
-        ROW1 = 1; ROW2 = 0; tmp = P2;
+        LINE2 = 1; LINE3 = 0; tmp = P2;
         if (!(tmp & 0x8)){ out = 'R';
         }
         if (!(tmp & 0x4)){
@@ -292,7 +365,7 @@ void second_str (void){
     // Нажата С (выводятся 3и буквы)
     if (flag == 'C'){
         // 1 строка
-        ROW0 = 0;
+        LINE1 = 0;
         tmp = P2;
         if (!(tmp & 0x8)){
             out = '1';
@@ -304,8 +377,8 @@ void second_str (void){
             out = 'F';
         }
         // 2 строка
-        ROW0 = 1;
-        ROW1 = 0;
+        LINE1 = 1;
+        LINE2 = 0;
         tmp = P2;
 
         if (!(tmp & 0x8)){
@@ -318,8 +391,8 @@ void second_str (void){
             out = 'O';
         }
         // 3 строка
-        ROW1 = 1;
-        ROW2 = 0;
+        LINE2 = 1;
+        LINE3 = 0;
         tmp = P2;
         if (!(tmp & 0x8)){
             out = 'S';
@@ -335,7 +408,7 @@ void second_str (void){
 
     if (flag == 'D'){
         for (i = 0; i <= 10000; i++) {} // 1 строка
-        ROW0 = 0; ROW1 = 0; ROW2 = 0; tmp = P2;
+        LINE1 = 0; LINE2 = 0; LINE3 = 0; tmp = P2;
         if (!(tmp & 0x8)){ out = '1';
         }
         if (!(tmp & 0x4)){ out = '2';
@@ -343,7 +416,7 @@ void second_str (void){
         if (!(tmp & 0x2)){ out = '3';
         }
         // 2 строка
-        ROW0 = 1; ROW1 = 0; tmp = P2;
+        LINE1 = 1; LINE2 = 0; tmp = P2;
         if (!(tmp & 0x8)){ out = '4';
         }
 
@@ -352,7 +425,7 @@ void second_str (void){
         if (!(tmp & 0x2)){ out = '6';
         }
         // 3 строка
-        ROW1 = 1; ROW2 = 0; tmp = P2;;
+        LINE2 = 1; LINE3 = 0; tmp = P2;;
         if (!(tmp & 0x8)){ out = '7';
         }
         if (!(tmp & 0x4)){ out = '8';
@@ -360,16 +433,18 @@ void second_str (void){
         if (!(tmp & 0x2)){ out = '9';
         }
     } // 4 строка
-    ROW2 = 1; ROW3 = 0; tmp = P2;
+    LINE3 = 1; LINE4 = 0; tmp = P2;
 
-    if (!(tmp & 0x8)){ out = '*';
+    if (!(tmp & 0x8)){
+        out = '*';
     }
     if (!(tmp & 0x4)){
-    out = '0';
+        out = '0';
     }
     if (!(tmp & 0x2)){
-    out = '#';
-    } ROW3 = 1;
+        out = '#';
+    }
+    LINE4 = 1;
 }
 
 //получение данных с UART
@@ -384,7 +459,6 @@ void UART_transfer (int data_uart){
     while (!TI0) {}
     TI0 = 0;
 }
-
 // сравнение паролей
 void code_comparison (void) {
     count1 = 1; x=0;
@@ -418,7 +492,6 @@ void code_comparison (void) {
     write_sentence (STR_cor);
     wait(300000000);
 }
-
 void wait(long count){
      for(i = 0; i < count; i++){}
 }
