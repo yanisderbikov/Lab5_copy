@@ -17,7 +17,7 @@ sbit CLR = P1^7;
 sbit CLK = P2^7;
 
 
-int i;
+int ii;
 long li;
 int position;
 int* ar;

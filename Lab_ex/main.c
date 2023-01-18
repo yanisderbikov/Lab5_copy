@@ -15,10 +15,12 @@ sbit COL2 = P2^2;
 sbit COL3 = P2^1;
 sbit COL4 = P2^0;
 
-sbit UART_GET = TI0;                 // UART0 TX interrupt flag
-sbit UART_RESIVE = RI0;              // UART0 RX interrupt flag
+// sbit UART_GET = TI0;                 // UART0 TX interrupt flag
+// sbit UART_RESIVE = RI0;              // UART0 RX interrupt flag
 
-long i;
+unsigned long ii;
+int i;
+int j;
 int n;
 int k;
 int s;
@@ -33,11 +35,17 @@ char out_pr;
 int outt;
 char flag;
 int count1;
-
+int count;
 int count2;
-int j;
 int x;
 int s=1;
+
+char pad[4][4] = {{'1', '2', '3', 'A'},
+                  {'4', '5', '6', 'B'},
+                  {'7', '8', '9', 'C'},
+                  {'*', '0', '#', 'D'}};
+
+
 //------------------------------------------------ // Function PROTOTYPES //------------------------------------------//
 void Init_Device(void);
 void PORT_Init (void);
@@ -73,21 +81,52 @@ void main (void){
     E = 0;
     display_init();
     flag = '0';
-//    code_comparison();
-//    test();
     runCode();
 }
 void runCode(){
     write_sentence("this is a code");
     second_str();
-    LINE1 = 1;  LINE2 = 1;  LINE3 = 1;  LINE4 = 1;
-    COL1 = 1;   COL2 = 1;   COL3 = 1;   COL4 = 1;
 
-    while (1){
+    while (1) {
         read_console();
-        write_code(out);
+        if (count == 6) {
+            delete_sentence();
+            count = 0;
+        }
+        if (out != '-'){
+            write_code(out);
+            count++;
+        }
+    }
+
+}
+void read_console (){
+// в столбце должен быть ноль
+    out = '-';
+    COL1 = 1;   COL2 = 1;   COL3 = 1;   COL4 = 1;
+    for (i = 0; i < 4; i++){
+        LINE1 = 1; LINE2 = 1; LINE3 = 1; LINE4 = 1;
+        if(i == 0) {LINE1 = 0;}
+        if(i == 1) {LINE2 = 0;}
+        if(i == 2) {LINE3 = 0;}
+        if(i == 3) {LINE4 = 0;}
+
+        if (COL1 == 0){
+            out = pad[i][0];
+            return;
+        } if (COL2 == 0){
+            out = pad[i][1];
+            return;
+        } if (COL3 == 0){
+            out = pad[i][2];
+            return;
+        } if (COL4 == 0){
+            out = pad[i][3];
+            return;
+        }
     }
 }
+
 void test(){
     while (1) {
         write_sentence("this is the first str");
@@ -109,60 +148,6 @@ void test(){
         wait(10000);
     }
 }
-void read_console (){
-    // этот метод буду самотоятельно кидать в цикл
-//    char tmp;
-//    out = '0';
-    // должна опрашиваться только одна строка
-    LINE1 = 1; LINE2 = 1; LINE3 = 1; LINE4 = 1;
-    char firstLine[] = {'1', '2', '3', 'A'};
-    char secLine[]   = {'4', '5', '6', 'B'};
-    char thirdLine[] = {'7', '8', '9', 'C'};
-    char forthLine[] = {'#', '*', '-', 'D'};
-    char f [] = {firstLine, secLine, thirdLine, forthLine};
-    int coloms[] = {COL1, COL2, COL3, COL4};
-//    int lines[] = {LINE1, LINE2, LINE3, LINE4};
-
-//    for (int ij = 0; ij < 4; ij++){
-//        lines[ij] = 0;
-//        for (int jj = 0; jj < 4; jj++){
-//            if (coloms[jj] == 0 ){
-//                out = f[jj];
-//            }
-//        }
-//        lines[ij] = 1;
-//    }
-
-    LINE1 = 0;
-    for (int jj = 0; jj < 4; jj++){
-        if (coloms[jj] == 0 ){
-            out = firstLine[jj];
-        }
-    }
-    LINE1 = 1;
-    LINE2 = 0;
-    for (int jj = 0; jj < 4; jj++){
-        if (coloms[jj] == 0 ){
-            out = secLine[jj];
-        }
-    }
-    LINE2 = 1;
-    LINE3 = 0;
-    for (int jj = 0; jj < 4; jj++){
-        if (coloms[jj] == 0 ){
-            out = thirdLine[jj];
-        }
-    }
-    LINE3 = 1;
-    LINE4 = 0;
-    for (int jj = 0; jj < 4; jj++){
-        if (coloms[jj] == 0 ){
-            out = forthLine[jj];
-        }
-    }
-    LINE4 = 1;
-
-}
 
 void Timer_Init(){ // there some shit
     TCON  = 0x40;
@@ -175,13 +160,13 @@ void UART_Init(){
 }
 void Port_IO_Init(){
     SFRPAGE   = CONFIG_PAGE;
-    P1MDOUT   = 0xE0;
-    P2MDOUT   = 0xFF;
+//    P1MDOUT   = 0xE0;
+//    P2MDOUT   = 0xFF;
     XBR1      = 0x40;
 }
 void Init_Device(void){
-    Timer_Init();
-    UART_Init();
+//    Timer_Init();
+//    UART_Init();
     Port_IO_Init();
 }
 // вывод команды
@@ -493,7 +478,7 @@ void code_comparison (void) {
     wait(300000000);
 }
 void wait(long count){
-     for(i = 0; i < count; i++){}
+     for(ii = 0; ii < count; ii++){}
 }
 //---------------------------------------------- // End Of File
 //-------
