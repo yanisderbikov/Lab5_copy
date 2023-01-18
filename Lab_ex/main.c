@@ -35,26 +35,26 @@ char out_pr;
 int outt;
 char flag;
 int count1;
-int count;
 int count2;
+int lengthOfPassword;
 int x;
 int s=1;
-
+int bool = 0;
 char pad[4][4] = {{'1', '2', '3', 'A'},
                   {'4', '5', '6', 'B'},
                   {'7', '8', '9', 'C'},
                   {'*', '0', '#', 'D'}};
+char input[6];
+char password[16];
+char output[17];
+
 
 
 //------------------------------------------------ // Function PROTOTYPES //------------------------------------------//
 void Init_Device(void);
-void PORT_Init (void);
-void Timer2_Init (int counts);
-void Timer2_ISR (void);
 void write_command (int write_data);
 void write_code (int write_data);
 void display_init (void);
-void display_init2(void);
 void write_sentence (unsigned char *STR);
 void delete_sentence (void);
 void write_sentence_2 (unsigned char *STR);
@@ -63,11 +63,14 @@ void second_str (void);
 void read_code (void);
 void UART_transfer (int data_uart);
 unsigned int UART_recieve (void);
-void code_comparison (void);
 void wait(long count);
 void test(void );
-void runCode(void );
+void getPasswordFromController(void );
 void read_console (void );
+int compartion(void );
+void Interrupts_Init();
+int check(void);
+void exe(void);
 //-----------------------------------------------------------------------------
 
 // MAIN Routine //-----------------------------------------------------------------------------
@@ -80,26 +83,59 @@ void main (void){
     Init_Device();
     E = 0;
     display_init();
-    flag = '0';
-    runCode();
+    test();
+//    exe();
 }
-void runCode(){
-    write_sentence("this is a code");
-    second_str();
-
+void test(){
     while (1) {
+        UART_transfer('A');
+    }
+}
+void exe(){
+//    while (1) {
+//        getPasswordFromController();
+//        if (check() == 1){
+//            delete_sentence();
+//            write_sentence(STR_cor);
+//            break;
+//        } else{
+//            write_sentence(STR_err);
+//            wait(10000);
+//            delete_sentence();
+//        }
+//    }
+}
+int check(){
+//    проверка пароля. Нужно отправлять на компуктер побитово
+//  сначала отправляется в бите длина
+//    for(i = 0; i < lengthOfPassword; i++){
+//        UART_transfer(output[i]);
+//        if (UART_recieve()){
+//            return 0;
+//        }
+//    }
+//    return 1;
+}
+
+void getPasswordFromController(){
+    write_sentence("write down your password");
+    second_str();
+    lengthOfPassword = 0;
+//    bool = 1;
+    while (1){
         read_console();
-        if (count == 6) {
-            delete_sentence();
-            count = 0;
-        }
         if (out != '-'){
+            if (out == '#'){
+                delete_sentence();
+                break;
+            }
             write_code(out);
-            count++;
+            password[lengthOfPassword++] = out;
         }
     }
-
+    output[0] = lengthOfPassword; // закидывается первый бит длины, который будет проверяться в программе
 }
+
 void read_console (){
 // в столбце должен быть ноль
     out = '-';
@@ -127,28 +163,6 @@ void read_console (){
     }
 }
 
-void test(){
-    while (1) {
-        write_sentence("this is the first str");
-        write_sentence_2("this is the sec");
-        first_str(); // перевод на первую строку курсора
-        wait(5000);
-        delete_sentence();
-        second_str();
-        write_sentence_2("ond str");
-        first_str();
-        write_sentence("end");
-        wait(10000);
-        wait(10000);
-        first_str();
-        delete_sentence();
-        second_str();
-        delete_sentence();
-        wait(10000);
-        wait(10000);
-    }
-}
-
 void Timer_Init(){ // there some shit
     TCON  = 0x40;
     TMOD = 0x20;
@@ -156,14 +170,35 @@ void Timer_Init(){ // there some shit
     TH1 = 0x60;
 }
 void UART_Init(){
-    SCON0 = 0x10;
+    SCON0     = 0x10;
 }
 void Port_IO_Init(){
+
     SFRPAGE   = CONFIG_PAGE;
-//    P1MDOUT   = 0xE0;
-//    P2MDOUT   = 0xFF;
+    P1MDOUT   = 0x80;
+    P2MDOUT   = 0xFF;
+    XBR0      = 0x01;
     XBR1      = 0x40;
+
 }
+void Interrupts_Init(){
+
+    SFRPAGE   = CONFIG_PAGE;
+    IE        = 0x82;
+}
+//получение данных с UART
+unsigned int UART_recieve (void){
+    while (!RI0){}
+    RI0 = 0;
+    return SBUF0;
+}
+// отправка данных на UART
+void UART_transfer (int data_uart){
+    SBUF0 = data_uart;
+    while (!TI0) {}
+    TI0 = 0;
+}
+
 void Init_Device(void){
 //    Timer_Init();
 //    UART_Init();
@@ -230,253 +265,12 @@ void delete_sentence (void) {
 void first_str (void){
     write_command(0x80);
 }
+
 // перевод курсора на 2 строку
 void second_str (void){
     write_command(0xC0);
 }
 // чтение символа с клавиатуры
-void read_code (void){
-    char tmp;
-    out = 'Z';
-    P2 = 0xff;
-    LINE1 = 0;
-    LINE2 = 0;
-    tmp = P2;
-
-    if (!(tmp & 0x1)){
-        flag = 'A';
-    }
-    LINE1 = 1;
-    LINE2 = 0;
-    tmp = P2;
-    if (!(tmp & 0x1)){
-        flag = 'B';
-    }
-    LINE2 = 1;
-
-    LINE3 = 0;
-    tmp = P2;
-    if (!(tmp & 0x1)){
-        flag = 'C';
-    }
-    LINE3 = 1;
-    LINE4 = 0;
-    tmp = P2;
-    if (!(tmp & 0x1)){
-        flag = 'D';
-    }
-
-    wait(10000);
-    // нажата А (выводятся первые буквы)
-    if (flag == 'A'){
-         LINE1 = 0;
-         tmp = P2;
-        // первая строка
-        wait(1000);
-        if (!(tmp & 0x8)){
-            out = '1';
-        }
-        if (!(tmp & 0x4)){
-            out = 'A';
-        }
-        if (!(tmp & 0x2)){
-            out = 'D';
-        }
-        // 2 строка
-        wait(5000);
-        LINE1 = 1;
-        LINE2 = 0;
-        tmp = P2;
-        if (!(tmp & 0x8)){
-            out = 'G';
-        }
-        if (!(tmp & 0x4)){
-            out = 'J';
-        }
-        if (!(tmp & 0x2)){
-            out = 'M';
-        }
-        wait(5000);
-        // 3 строка
-        LINE2 = 1;
-        LINE3 = 0;
-        tmp = P2;
-        if (!(tmp & 0x8)){
-            out = 'P';
-        }
-        if (!(tmp & 0x4)){
-            out = 'T';
-        }
-        if (!(tmp & 0x2)){
-            out = 'W';
-        }
-    }
-
-    wait(10000);
-    // Нажата В (выводятся 2е буквы)
-        if (flag == 'B'){
-        // первая строка
-        for (i = 0; i <= 10000; i++) {}
-        LINE1 = 0; LINE2 = 0; LINE3 = 0; LINE4 = 0; tmp = P2;
-        if (!(tmp & 0x8)){
-            out = '1';
-        }
-        if (!(tmp & 0x4)){
-            out = 'B';
-        }
-        if (!(tmp & 0x2)){
-            out = 'E';
-        }
-        // 2 строка
-        LINE1 = 1;
-        LINE2 = 0; LINE3 = 0; tmp = P2;
-        if (!(tmp & 0x8)){ out = 'H';
-        }
-        if (!(tmp & 0x4)){ out = 'K';
-        }
-        if (!(tmp & 0x2)){ out = 'N';
-        }
-        // 3 строка
-        LINE2 = 1; LINE3 = 0; tmp = P2;
-        if (!(tmp & 0x8)){ out = 'R';
-        }
-        if (!(tmp & 0x4)){
-
-        out = 'U';
-        }
-        if (!(tmp & 0x2)){ out = 'X';
-        }
-    }
-    // Нажата С (выводятся 3и буквы)
-    if (flag == 'C'){
-        // 1 строка
-        LINE1 = 0;
-        tmp = P2;
-        if (!(tmp & 0x8)){
-            out = '1';
-        }
-        if (!(tmp & 0x4)){
-            out = 'C';
-        }
-        if (!(tmp & 0x2)){
-            out = 'F';
-        }
-        // 2 строка
-        LINE1 = 1;
-        LINE2 = 0;
-        tmp = P2;
-
-        if (!(tmp & 0x8)){
-            out = 'I';
-        }
-        if (!(tmp & 0x4)){
-            out = 'L';
-        }
-        if (!(tmp & 0x2)){
-            out = 'O';
-        }
-        // 3 строка
-        LINE2 = 1;
-        LINE3 = 0;
-        tmp = P2;
-        if (!(tmp & 0x8)){
-            out = 'S';
-        }
-        if (!(tmp & 0x4)){
-            out = 'V';
-        }
-        if (!(tmp & 0x2)){
-            out = 'Y';
-        }
-    }
-    // Нажата D (выводятся цифры)
-
-    if (flag == 'D'){
-        for (i = 0; i <= 10000; i++) {} // 1 строка
-        LINE1 = 0; LINE2 = 0; LINE3 = 0; tmp = P2;
-        if (!(tmp & 0x8)){ out = '1';
-        }
-        if (!(tmp & 0x4)){ out = '2';
-        }
-        if (!(tmp & 0x2)){ out = '3';
-        }
-        // 2 строка
-        LINE1 = 1; LINE2 = 0; tmp = P2;
-        if (!(tmp & 0x8)){ out = '4';
-        }
-
-        if (!(tmp & 0x4)){ out = '5';
-        }
-        if (!(tmp & 0x2)){ out = '6';
-        }
-        // 3 строка
-        LINE2 = 1; LINE3 = 0; tmp = P2;;
-        if (!(tmp & 0x8)){ out = '7';
-        }
-        if (!(tmp & 0x4)){ out = '8';
-        }
-        if (!(tmp & 0x2)){ out = '9';
-        }
-    } // 4 строка
-    LINE3 = 1; LINE4 = 0; tmp = P2;
-
-    if (!(tmp & 0x8)){
-        out = '*';
-    }
-    if (!(tmp & 0x4)){
-        out = '0';
-    }
-    if (!(tmp & 0x2)){
-        out = '#';
-    }
-    LINE4 = 1;
-}
-
-//получение данных с UART
- unsigned int UART_recieve (void){
-    while (!RI0){}
-    RI0 = 0;
-    return SBUF0;
-}
-// отправка данных на UART
-void UART_transfer (int data_uart){
-    SBUF0 = data_uart;
-    while (!TI0) {}
-    TI0 = 0;
-}
-// сравнение паролей
-void code_comparison (void) {
-    count1 = 1; x=0;
-    while ((count1 <= 16) & (out != '0')){
-        read_code();
-        if ((out != '0')&(out != 'Z')){
-            STR_COMP[count1] = out;
-            write_code(out);
-            count1++;
-        }
-    }
-    UART_transfer(count1-1);
-    x = UART_recieve();
-    if (x == 0xaa){
-        write_sentence (STR_err);
-        wait(30000);
-        return;
-    }
-    count2 = 1;
-    while (count2 <= (count1-1)){
-        UART_transfer(STR_COMP[count2]);
-        count2++;
-        x = UART_recieve();
-
-        if (x == 0xaa){
-            write_sentence (STR_err);
-            wait(30000);
-            return;
-        }
-    }
-    write_sentence (STR_cor);
-    wait(300000000);
-}
 void wait(long count){
      for(ii = 0; ii < count; ii++){}
 }

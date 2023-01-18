@@ -1,6 +1,3 @@
-//
-// Created by Ян Дербиков  on 23.11.2022.
-//
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -17,7 +14,7 @@ sbit CLR = P1^7;
 sbit CLK = P2^7;
 
 
-int ii;
+int i;
 long li;
 int position;
 int* ar;
@@ -126,7 +123,8 @@ char code Font[96][6] = {
 {0x7F,0x7F,0x7F,0x7F,0x7F,0x0}};
 
 int s;
-
+char xdata buf[149];
+void setBu();
 
 
 //-----------------------------------------------------------------------------
@@ -139,6 +137,23 @@ void Interrupts_Init();
 void Print(int pos);
 void PrintRun(int pos);
 int getSymbol(char a);
+void symbolLoad(int pos, int symb);
+void UART_Init(void);
+unsigned int UART_transfer (int data_uart);
+unsigned int UART_recive (void);
+
+
+int k_shift;
+int run_count = 10;
+
+int command;
+int kk;
+int cSymb = -1;
+int flag = 0;
+
+//del af
+int iii;
+int iiii;
 
 //-----------------------------------------------------------------------------
 // MAIN Routine
@@ -157,40 +172,198 @@ void main (void)
     position = 0;
     for(li = 0; li <= 1000; li++){}
     CLR = 0;
-    P2 = 0x7f;
+    P2 = 0x7f^0xff;
 
-    s = getSymbol('D');
 
-    buff[1] = getSymbol('M');
-    buff[2] = getSymbol('A');
-    buff[3] = getSymbol('T');
-    buff[4] = getSymbol('R');
-    buff[5] = getSymbol('I');
-    buff[6] = getSymbol('X');
-    buff[7] = getSymbol('!');
-    buff[8] = getSymbol(' ');
 
-    buff[9] = getSymbol(' ');
-    buff[10] = getSymbol(' ');
-    buff[11] = getSymbol('M');
-    buff[12] = getSymbol('A');
-    buff[13] = getSymbol('T');
-    buff[14] = getSymbol('R');
-    buff[15] = getSymbol('I');
-    buff[16] = getSymbol('X');
-    buff[17] = getSymbol('!');
-    buff[18] = getSymbol(' ');
-    buff[19] = getSymbol(' ');
-    buff[20] = getSymbol(' ');
+    for(li = 0; li<149; li++){
+        buf[li] = 0x7f^0xff;
+    }
+
+
+
+
+    symbolLoad(0, ' ');
+    symbolLoad(1, ' ');
+    symbolLoad(2, ' ');
+    symbolLoad(3, ' ');
+    symbolLoad(4, ' ');
+    symbolLoad(5, ' ');
+    symbolLoad(6, ' ');
+    symbolLoad(7, ' ');
+    symbolLoad(8, ' ');
+    symbolLoad(9, ' ');
+    symbolLoad(10, ' ');
+    symbolLoad(11, ' ');
+    symbolLoad(12, ' ');
+    symbolLoad(13, ' ');
+    symbolLoad(14, ' ');
+
+    for(iii = 0; iii < 20; iii++){
+        buff[iii] = ' ';
+        symbolLoad(iii,' ');
+    }
+
+    //   buf[47] = 0x7f^0xff;
 
     Timer_Init();
+    UART_Init();
     Interrupts_Init();
 
+    command = 0x17;
     while (1)
     {
 
-    }
+        switch (command)
+        {
+            //?a?ei aaaa?uae no?iee
+            case 0x11:
+                flag = 0;
+                while (flag == 0){
+                    kk = UART_recive();
+                    cSymb++;
+                    switch (kk)
 
+                        //?a?ei oa?ieiaeuiiai auaiaa
+                    {case 0x17:
+                            command = 0x17;
+                            flag = 1;
+                            cSymb = -1;
+                            symbolLoad(0, ' ');
+                            symbolLoad(1, ' ');
+                            symbolLoad(2, ' ');
+                            symbolLoad(3, ' ');
+                            symbolLoad(4, ' ');
+                            symbolLoad(5, ' ');
+                            symbolLoad(6, ' ');
+                            symbolLoad(7, ' ');
+                            symbolLoad(8, ' ');
+                            symbolLoad(9, ' ');
+                            symbolLoad(10, ' ');
+                            symbolLoad(11, ' ');
+                            symbolLoad(12, ' ');
+                            symbolLoad(13, ' ');
+                            symbolLoad(14, ' ');
+                            break;
+
+                            //Caaa?oaao aaia neiaieia
+                        case 0x0d:
+                            cSymb = -1;
+                            command = 0x11;
+                            break;
+
+                            //Na?in ?a?eia a ia?aeuiia ninoiyiea
+                        case 0x03:
+                            symbolLoad(0, ' ');
+                            symbolLoad(1, ' ');
+                            symbolLoad(2, ' ');
+                            symbolLoad(3, ' ');
+                            symbolLoad(4, ' ');
+                            symbolLoad(5, ' ');
+                            symbolLoad(6, ' ');
+                            symbolLoad(7, ' ');
+                            symbolLoad(8, ' ');
+                            symbolLoad(9, ' ');
+                            symbolLoad(10, ' ');
+                            symbolLoad(11, ' ');
+                            symbolLoad(12, ' ');
+                            symbolLoad(13, ' ');
+                            symbolLoad(14, ' ');
+                            cSymb = -1;
+                            break;
+
+
+                        default:
+                            symbolLoad(cSymb, kk);
+                            break;
+                    }
+
+                }
+
+                break;
+
+                //?a?ei oa?ieiaeuiiai auaiaa
+            case 0x17:
+                flag = 0;
+                while (flag ==0){
+                    kk = UART_recive();
+                    cSymb++;
+                    switch (kk){
+                        //?a?ei aaaa?uae no?iee
+                        case 0x11:
+                            command = 0x11;
+                            flag = 1;
+                            cSymb = -1;
+                            symbolLoad(0, ' ');
+                            symbolLoad(1, ' ');
+                            symbolLoad(2, ' ');
+                            symbolLoad(3, ' ');
+                            symbolLoad(4, ' ');
+                            symbolLoad(5, ' ');
+                            symbolLoad(6, ' ');
+                            symbolLoad(7, ' ');
+                            symbolLoad(8, ' ');
+                            symbolLoad(9, ' ');
+                            symbolLoad(10, ' ');
+                            symbolLoad(11, ' ');
+                            symbolLoad(12, ' ');
+                            symbolLoad(13, ' ');
+                            symbolLoad(14, ' ');
+                            break;
+
+                            //Oaaeaiea iineaaiaai neiaiea e naaea aeaai
+                        case 0x0008:
+                            cSymb--;
+                            if(cSymb<0){
+                                cSymb =0;
+                            }
+
+                            buff[cSymb] = ' ';
+                            iiii = cSymb-7;
+                            if(cSymb >= 8){
+                                for(iii = 0; iii <= 7; iii++){
+                                    symbolLoad(iii, buff[iiii-1]);
+                                    iiii++;
+                                }
+                            }
+                            else{
+                                for(iii = 0; iii <= 7; iii++){
+                                    symbolLoad(iii, buff[iii]);
+                                }
+                            }
+                            cSymb--;
+                            break;
+
+                            //Na?in ?a?eia a ia?aeuiia ninoiyiea
+                        case 0x03:
+                            for(iii = 0; iii < 20; iii++){
+                                buff[iii] = ' ';
+                                symbolLoad(iii,' ');
+                            }
+                            cSymb = -1;
+                            break;
+                            //IE i?eieiaao io PC aaeou n eiaaie neiaieia
+                        default:
+
+                            buff[cSymb] = kk;
+                            iiii = cSymb-7;
+                            if(cSymb >= 8){
+                                for(iii = 0; iii <= 7; iii++){
+                                    symbolLoad(iii, buff[iiii]);
+                                    iiii++;
+                                }
+                            }
+                            else{
+                                for(iii = 0; iii <= 7; iii++){
+                                    symbolLoad(iii, buff[iii]);
+                                }
+                            }
+                            break;
+                    }
+                }
+                break;
+        }
+    }
 }
 
 void Port_IO_Init()
@@ -199,17 +372,26 @@ void Port_IO_Init()
     SFRPAGE   = CONFIG_PAGE;
     P1MDOUT   = 0x80;
     P2MDOUT   = 0xFF;
+    XBR0      = 0x01;
     XBR1      = 0x40;
 
 }
 
 void Timer_Init()
 {
-    TCON      = 0x10;
-    TMOD      = 0x02;
+    TCON      = 0x50;
+    TMOD      = 0x22;
     TL0       = 0xCD;
     TH0       = 0xCD;
+    CKCON     = 0x08;
+    TH1       = 0x60;
 }
+
+void UART_Init()
+{
+    SCON0     = 0x10;
+}
+
 
 void Interrupts_Init()
 {
@@ -226,53 +408,57 @@ CLK = 1;
 CLK = 0;
 position++;
 
+//   UART_transfer (position);
+//   k = UART_recive();
+//   Print(position);
+//   PrintRun(position);
+
+switch (command)
+{
+case 0x11:
 PrintRun(position);
+break;
+case 0x17:
+Print(position);
+break;
+}
 
-if(CTRL_Q == 0x11){
 
 }
 
 
-
-
-
-}
 
 void Print(int pos){
-    if (position >= 49){
-        position = 0;
+
+    if (position >= 48){
+        position = -1;
+        P2 = buf[position]^0xff;
     }
-    if (position<49){
-        P2 = Font[buff[position/6+1]][position- 6*(position/6)]^0xff;
+    else{
+        P2 = buf[position]^0xff;
     }
 }
 
-void PrintRun(position){
-    int e;
-    //   int sp;
-    int ii;
-    if (position >= 49){
-        position = 0;
-        e++;
-    }
+void PrintRun(int pos){
+    int k;
 
-
-
-    for (ii = 1; ii <9; ii++){
-
+    if (position >= 48){
+        position = -1;
+        run_count--;
+        if(run_count == 0){
+            run_count = 10;
+            k_shift++;
+            if(k_shift==149){k_shift=0;}
+        }
 
     }
-    Print(position);
-
-    //   if(e%2==1){
-    //CLK = 1;
-    //  CLK = 1;
-    // CLK = 1;
-    //CLK = 1;
-    //CLK = 0;
-    //}
+    k = position+k_shift;
+    if(k>148){k=k-149;}
+    P2 = buf[k]^0xff;
 
 }
+
+
 
 
 
@@ -285,6 +471,40 @@ int getSymbol(char a){
 }
 
 
+void setBu(){
+    char xdata t[149];
+    for(li = 0; li < 149; li++){
+        t[li]= li/6+1;
+        buf[li] = Font[buff[li/6+1]][li- 6*(li/6)];
+    }
+}
+
+void symbolLoad(int pos, int symb){
+    int l;
+    int f;
+    l = pos*6;
+    f = symb-32;
+
+    for (li = 0; li<6;l++,li++){
+        buf[l] = Font[f][li];
+    }
+}
+
+
+
+unsigned int UART_transfer (int data_uart){
+    SBUF0 = data_uart;
+    while(!TI0){}
+    TI0 = 0;
+
+}
+
+
+unsigned int UART_recive (void){
+    while(!RI0){}
+    RI0 = 0;
+    return SBUF0;
+}
 
 
 //
