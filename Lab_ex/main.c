@@ -22,14 +22,8 @@ unsigned long ii;
 int i;
 int j;
 int n;
-int k;
 int s;
 int code1;
-unsigned char STR1[]="Hello";
-unsigned char STR2[]="world";
-unsigned char STR_err[]=" ERROR";
-unsigned char STR_cor[]=" CORRECT";
-unsigned char STR_COMP[];
 char out;
 char out_pr;
 int outt;
@@ -39,15 +33,13 @@ int count2;
 int lengthOfPassword;
 int x;
 int s=1;
-int bool = 0;
 char pad[4][4] = {{'1', '2', '3', 'A'},
                   {'4', '5', '6', 'B'},
                   {'7', '8', '9', 'C'},
                   {'*', '0', '#', 'D'}};
 char input[6];
-char password[16];
-char output[17];
-
+char outputPassword[17];
+char WRONG        = 0xAA;
 
 
 //------------------------------------------------ // Function PROTOTYPES //------------------------------------------//
@@ -83,45 +75,39 @@ void main (void){
     Init_Device();
     E = 0;
     display_init();
-    test();
-//    exe();
-}
-void test(){
-    while (1) {
-        UART_transfer('A');
-    }
+    exe();
+//    test();
 }
 void exe(){
-//    while (1) {
-//        getPasswordFromController();
-//        if (check() == 1){
-//            delete_sentence();
-//            write_sentence(STR_cor);
-//            break;
-//        } else{
-//            write_sentence(STR_err);
-//            wait(10000);
-//            delete_sentence();
-//        }
-//    }
+    while (1) {
+        getPasswordFromController();
+        if (check() == 1){
+            delete_sentence();
+            write_sentence("CORRECT");
+            break;
+        } else{
+            write_sentence("WRONG");
+            wait(10000);
+            delete_sentence();
+        }
+    }
 }
 int check(){
 //    проверка пароля. Нужно отправлять на компуктер побитово
 //  сначала отправляется в бите длина
-//    for(i = 0; i < lengthOfPassword; i++){
-//        UART_transfer(output[i]);
-//        if (UART_recieve()){
-//            return 0;
-//        }
-//    }
-//    return 1;
+    for(i = 0; i < lengthOfPassword; i++){
+        UART_transfer(outputPassword[i]);
+        if (UART_recieve()){
+            return 0;
+        }
+    }
+    return 1;
 }
-
 void getPasswordFromController(){
-    write_sentence("write down your password");
+    write_sentence("write a password:");
     second_str();
     lengthOfPassword = 0;
-//    bool = 1;
+
     while (1){
         read_console();
         if (out != '-'){
@@ -130,10 +116,16 @@ void getPasswordFromController(){
                 break;
             }
             write_code(out);
-            password[lengthOfPassword++] = out;
+            outputPassword[1 + lengthOfPassword++] = out;
         }
     }
-    output[0] = lengthOfPassword; // закидывается первый бит длины, который будет проверяться в программе
+    outputPassword[0] = lengthOfPassword; // закидывается первый бит длины, который будет проверяться в программе
+}
+
+void test(){
+    while (1) {
+        UART_transfer('A');
+    }
 }
 
 void read_console (){
@@ -143,20 +135,20 @@ void read_console (){
     for (i = 0; i < 4; i++){
         LINE1 = 1; LINE2 = 1; LINE3 = 1; LINE4 = 1;
         if(i == 0) {LINE1 = 0;}
-        if(i == 1) {LINE2 = 0;}
-        if(i == 2) {LINE3 = 0;}
-        if(i == 3) {LINE4 = 0;}
+        else if(i == 1) {LINE2 = 0;}
+        else if(i == 2) {LINE3 = 0;}
+        else if(i == 3) {LINE4 = 0;}
 
         if (COL1 == 0){
             out = pad[i][0];
             return;
-        } if (COL2 == 0){
+        } else if (COL2 == 0){
             out = pad[i][1];
             return;
-        } if (COL3 == 0){
+        } else if (COL3 == 0){
             out = pad[i][2];
             return;
-        } if (COL4 == 0){
+        } else if (COL4 == 0){
             out = pad[i][3];
             return;
         }
@@ -175,8 +167,6 @@ void UART_Init(){
 void Port_IO_Init(){
 
     SFRPAGE   = CONFIG_PAGE;
-    P1MDOUT   = 0x80;
-    P2MDOUT   = 0xFF;
     XBR0      = 0x01;
     XBR1      = 0x40;
 
@@ -200,8 +190,8 @@ void UART_transfer (int data_uart){
 }
 
 void Init_Device(void){
-//    Timer_Init();
-//    UART_Init();
+    Timer_Init();
+    UART_Init();
     Port_IO_Init();
 }
 // вывод команды
@@ -247,13 +237,6 @@ void display_init (void){
 // вывод предложения
 void write_sentence (unsigned char *STR) {
     for(n=0; STR[n]!=0; n++){
-        write_code(STR[n]);
-    }
-}
-//вывод предложения на 2 строку
-void write_sentence_2 (unsigned char *STR) {
-    write_command(0xC0);
-    for(n=0; STR[n]!=0;n++){
         write_code(STR[n]);
     }
 }
