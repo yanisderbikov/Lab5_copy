@@ -76,7 +76,6 @@ void main (void){
     E = 0;
     display_init();
     exe();
-//    test();
 }
 void exe(){
     while (1) {
@@ -165,7 +164,7 @@ void UART_Init(){
     SCON0     = 0x10;
 }
 void Port_IO_Init(){
-
+// there was some stranges
     SFRPAGE   = CONFIG_PAGE;
     XBR0      = 0x01;
     XBR1      = 0x40;
